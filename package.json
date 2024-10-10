@@ -1,0 +1,14 @@
+{
+  "name": "elm-parser",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Anshul Verma",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "elm-test": "^0.19.1-revision12"
+  }
+}
