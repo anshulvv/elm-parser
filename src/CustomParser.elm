@@ -21,6 +21,17 @@ run customParser input =
 
 -- Definitions of parsers
 
+eatSpaces : Parser String
+eatSpaces =
+    let
+        isSpace : Char -> Bool
+        isSpace char =
+            char == ' ' || char == '\t' || char == '\r'
+    in
+        Parser.getChompedString <|
+            Parser.succeed ()
+                |. Parser.chompWhile isSpace
+
 
 -- list of int parser
 
@@ -31,10 +42,10 @@ listInt =
     }
 
 
-
 parserListInt : Parser (List Int)
 parserListInt =
     Parser.succeed identity
+        |. eatSpaces
         |= Parser.oneOf
             [ Parser.succeed []
                 |. Parser.spaces
@@ -49,13 +60,6 @@ parserListIntHelper li =
         callback i next =
             next (i :: li)
 
-        isSpace char =
-            char == ' ' || char == '\t' || char == '\r'
-
-        eatSpaces =
-            Parser.getChompedString <|
-                Parser.succeed ()
-                    |. Parser.chompWhile isSpace
     in
     Parser.succeed callback
         |. eatSpaces
@@ -67,3 +71,4 @@ parserListIntHelper li =
             , Parser.succeed Loop
                 |. Parser.symbol ","
             ]
+

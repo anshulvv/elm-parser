@@ -16,7 +16,10 @@ type ExpectedOutput b a =
 type ParserJudgement =
     Passed | Failed
 
+
+
 -- helpers for testing
+
 
 passResultToExpectation : a -> ExpectedOutput b a -> Expectation
 passResultToExpectation actualVal expectedOutput =
@@ -33,7 +36,7 @@ errorResultToExpectation actualError expectedOutput =
         Error e -> Expect.equal actualError e
         Fail -> Expect.pass
         Success -> Expect.fail "Expected test to pass, it failed instead"
-        Equal expectedValue -> Expect.fail ("Expected result to be: " ++ Debug.toString expectedValue ++ "\nTest failed insted")
+        Equal expectedValue -> Expect.fail ("Expected result to be: " ++ Debug.toString expectedValue ++ "\nTest failed instead" )
         NotEqual _ -> Expect.fail "Expected test to pass, it failed instead"
 
 createTestFromResult : String -> Expectation -> Test
@@ -65,10 +68,8 @@ testListInt : Test
 testListInt =
     describe "testing list int: "
         (customParserTests CustomParser.listInt
-            [{ testName = "valid list"
-            , input = "4,232,67,2234,123"
-            , expectedOutput = Equal [4,232,67,2234,123]
-            }
+            [ { testName = "valid list", input = "4,232,67,2234,123", expectedOutput = Equal [4,232,67,2234,123] }
+            , { testName = "valid list: with random spaces", input = "  4 ,232  , 67   ,   2234 ,    123", expectedOutput = Equal [4,232,67,2234,123] }
             ]
         )
                         

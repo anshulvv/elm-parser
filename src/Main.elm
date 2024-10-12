@@ -86,7 +86,7 @@ parseListOfInt : String -> Model
 parseListOfInt input =
     let
         result =
-            CustomParser.run CustomParser.listInt (String.trim input)
+            CustomParser.run CustomParser.listInt input
     in
     case result of
         Ok list ->
