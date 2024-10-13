@@ -38,7 +38,7 @@ main =
 init : Model
 init =
     { err = Nothing
-    , parsedList = Nothing
+    , parsedList = Just []
     , input = ""
     }
 
@@ -64,9 +64,9 @@ view model =
                 |> Maybe.withDefault (Debug.toString result)
     in
     Html.div []
-        [ Html.input
+        [ Html.textarea
             [ Events.onInput OnInputChange, Attributes.value model.input ]
-            [ Html.text <| "I wrote something" ]
+            []
         , Html.p [] [ Html.text (printResult model.err model.parsedList) ]
         ]
 
@@ -76,24 +76,21 @@ view model =
 
 
 update : Msg -> Model -> Model
-update msg model =
+update msg _ =
     case msg of
         OnInputChange input ->
-            parseListOfInt input
+            let
+                result =
+                    parseListOfInt input
+            in
+            case result of
+                Ok listInt ->
+                    Model Nothing (Just listInt) input
+
+                Err error ->
+                    Model (Just error) Nothing input
 
 
-parseListOfInt : String -> Model
+parseListOfInt : String -> Result String (List Int)
 parseListOfInt input =
-    let
-        result =
-            CustomParser.run CustomParser.listInt input
-    in
-    case result of
-        Ok list ->
-            Model Nothing (Just list) input
-
-        Err str ->
-            Model (Just str) Nothing input
-
-
-
+    CustomParser.run CustomParser.listInt input

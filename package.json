@@ -10,5 +10,8 @@
   "description": "",
   "devDependencies": {
     "elm-test": "^0.19.1-revision12"
+  },
+  "dependencies": {
+    "elm-format": "^0.8.7"
   }
 }

@@ -1,19 +1,20 @@
-module CustomParser exposing (CustomParser, run, listInt)
+module CustomParser exposing (CustomParser, listInt, run)
 
 import Parser exposing ((|.), (|=), Parser, Step(..))
 
 
-
 type alias CustomParser a =
-    { name: String
-    , parser: Parser.Parser a
+    { name : String
+    , parser : Parser.Parser a
     }
+
 
 
 -- Runner
 
+
 run : CustomParser a -> String -> Result String a
-run customParser input = 
+run customParser input =
     Parser.run customParser.parser input
         |> Result.mapError Parser.deadEndsToString
 
@@ -21,19 +22,22 @@ run customParser input =
 
 -- Definitions of parsers
 
+
 eatSpaces : Parser String
 eatSpaces =
     let
         isSpace : Char -> Bool
         isSpace char =
-            char == ' ' || char == '\t' || char == '\r'
+            char == ' ' || char == '\t'
     in
-        Parser.getChompedString <|
-            Parser.succeed ()
-                |. Parser.chompWhile isSpace
+    Parser.getChompedString <|
+        Parser.succeed ()
+            |. Parser.chompWhile isSpace
+
 
 
 -- list of int parser
+
 
 listInt : CustomParser (List Int)
 listInt =
@@ -59,7 +63,6 @@ parserListIntHelper li =
     let
         callback i next =
             next (i :: li)
-
     in
     Parser.succeed callback
         |. eatSpaces
@@ -71,4 +74,3 @@ parserListIntHelper li =
             , Parser.succeed Loop
                 |. Parser.symbol ","
             ]
-
