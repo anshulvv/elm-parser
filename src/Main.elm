@@ -1,10 +1,10 @@
 module Main exposing (main)
 
 import Browser
-import CustomParser
 import Html exposing (Html)
 import Html.Attributes as Attributes
 import Html.Events as Events
+import ParserHandler exposing (ParsedValueType(..), ParserType(..))
 
 
 
@@ -12,8 +12,8 @@ import Html.Events as Events
 
 
 type alias Model =
-    { err : Maybe String
-    , parsedList : Maybe (List Int)
+    { selectedParser : ParserType
+    , parserResult : Result String ParsedValueType
     , input : String
     }
 
@@ -37,8 +37,8 @@ main =
 
 init : Model
 init =
-    { err = Nothing
-    , parsedList = Just []
+    { selectedParser = ListIntParser
+    , parserResult = Ok (ListInt [])
     , input = ""
     }
 
@@ -49,6 +49,7 @@ init =
 
 type Msg
     = OnInputChange String
+    | OnChangeParserType ParserType
 
 
 
@@ -58,16 +59,25 @@ type Msg
 view : Model -> Html Msg
 view model =
     let
-        printResult : Maybe String -> Maybe a -> String
-        printResult err result =
-            err
-                |> Maybe.withDefault (Debug.toString result)
+        printParserResult : Result String ParsedValueType -> String
+        printParserResult result =
+            case result of
+                Ok parsedValue ->
+                    ParserHandler.getStringValue parsedValue
+
+                Err error ->
+                    error
+
+        viewItem parserType =
+            Html.button [ Events.onClick (OnChangeParserType parserType) ] [ Html.text <| ParserHandler.parserTypeToString parserType ]
     in
     Html.div []
         [ Html.textarea
             [ Events.onInput OnInputChange, Attributes.value model.input ]
             []
-        , Html.p [] [ Html.text (printResult model.err model.parsedList) ]
+        , Html.p [] [ Html.text (printParserResult model.parserResult) ]
+        , Html.ul []
+            (List.map viewItem ParserHandler.allParsers)
         ]
 
 
@@ -76,21 +86,17 @@ view model =
 
 
 update : Msg -> Model -> Model
-update msg _ =
+update msg model =
     case msg of
         OnInputChange input ->
-            let
-                result =
-                    parseListOfInt input
-            in
-            case result of
-                Ok listInt ->
-                    Model Nothing (Just listInt) input
+            { model
+                | parserResult = ParserHandler.parse input model.selectedParser
+                , input = input
+            }
 
-                Err error ->
-                    Model (Just error) Nothing input
-
-
-parseListOfInt : String -> Result String (List Int)
-parseListOfInt input =
-    CustomParser.run CustomParser.listInt input
+        OnChangeParserType selectedParserType ->
+            { model
+                | selectedParser = selectedParserType
+                , input = ""
+                , parserResult = Err "Please enter something"
+            }

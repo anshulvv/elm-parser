@@ -1,4 +1,4 @@
-module CustomParser exposing (CustomParser, listInt, run)
+module CustomParser exposing (CustomParser, listInt, listString, run)
 
 import Parser exposing ((|.), (|=), Parser, Step(..))
 
@@ -44,6 +44,45 @@ listInt =
     { name = "List of Integers"
     , parser = parserListInt
     }
+
+
+listString : CustomParser (List String)
+listString =
+    { name = "List of Strings"
+    , parser = parserListString
+    }
+
+
+parserListString : Parser (List String)
+parserListString =
+    Parser.succeed identity
+        |. eatSpaces
+        |= Parser.oneOf
+            [ Parser.succeed []
+                |. Parser.spaces
+                |. Parser.end
+            , Parser.loop [] parserListStringHelper
+            ]
+
+
+parserListStringHelper : List String -> Parser (Step (List String) (List String))
+parserListStringHelper ls =
+    let
+        callback s next =
+            next (s :: ls)
+    in
+    Parser.succeed callback
+        |. eatSpaces
+        |= (Parser.getChompedString <|
+                (Parser.succeed () |. Parser.chompWhile Char.isAlpha)
+           )
+        |. eatSpaces
+        |= Parser.oneOf
+            [ Parser.succeed (Done << List.reverse)
+                |. Parser.end
+            , Parser.succeed Loop
+                |. Parser.symbol ","
+            ]
 
 
 parserListInt : Parser (List Int)
